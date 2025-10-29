@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Твоё случайное приключение</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9eb5 0%, #f8c8dc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .sparkles {
+            font-size: 40px;
+            margin-bottom: 15px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 22px;
+            line-height: 1.4;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .main-btn {
+            background: linear-gradient(135deg, #ff6b9d, #ff8eb4);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .main-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .main-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .main-btn.updating {
+            background: linear-gradient(135deg, #ff85a2, #ff9eb5);
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        .maps-title {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .maps-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .map-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .map-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(110%);
+        }
+
+        .yandex { background: #ffcc00; color: #000; }
+        .google { background: #4285f4; }
+        .gis { background: #2d8cff; }
+
+        .status {
+            height: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #ff6b9d;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status.show {
+            opacity: 1;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 20px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sparkles">✨</div>
+        <h1>Вот случайное место для твоей прогулки</h1>
+        <p class="message">Обнови локацию и открой в удобной карте</p>
+
+        <button class="main-btn" id="refresh-btn" onclick="generateNewLocation()">
+            <span>🔄</span>
+            НОВАЯ ЛОКАЦИЯ
+        </button>
+
+        <div class="status" id="status"></div>
+
+        <div class="maps-title">Открыть в картах:</div>
+        <div class="maps-grid">
+            <a href="#" class="map-btn yandex" id="yandex-link" target="_blank">
+                📍 Яндекс
+            </a>
+            <a href="#" class="map-btn google" id="google-link" target="_blank">
+                🌍 Google
+            </a>
+            <a href="#" class="map-btn gis" id="gis-link" target="_blank">
+                🗺️ 2ГИС
+            </a>
+        </div>
+
+        <div class="hint">
+            Каждый раз новое место в Тюмени<br>
+            Найди что-то интересное!
+        </div>
+    </div>
+
+    <script>
+        const latMin = 57.102143;
+        const latMax = 57.166647;
+        const lonMin = 65.482014;
+        const lonMax = 65.611471;
+
+        let currentLat, currentLon;
+        let isUpdating = false;
+
+        function generateRandomLocation() {
+            currentLat = latMin + Math.random() * (latMax - latMin);
+            currentLon = lonMin + Math.random() * (lonMax - lonMin);
+
+            const latFormatted = currentLat.toFixed(6);
+            const lonFormatted = currentLon.toFixed(6);
+
+            document.getElementById('yandex-link').href =
+                `https://yandex.ru/maps/?pt=${currentLon},${currentLat}&z=17&l=map`;
+
+            document.getElementById('google-link').href =
+                `https://www.google.com/maps?q=${latFormatted},${lonFormatted}&z=17`;
+
+            document.getElementById('gis-link').href =
+                `https://2gis.ru/geo/${currentLon},${currentLat}`;
+        }
+
+        function generateNewLocation() {
+            if (isUpdating) return;
+
+            isUpdating = true;
+            const btn = document.getElementById('refresh-btn');
+            const status = document.getElementById('status');
+
+            status.classList.remove('show');
+
+            btn.classList.add('updating');
+            btn.innerHTML = '<span>🎯</span> ИЩЕМ МЕСТО...';
+
+            setTimeout(() => {
+                generateRandomLocation();
+
+                btn.classList.remove('updating');
+                btn.innerHTML = '<span>🔄</span> НОВАЯ ЛОКАЦИЯ';
+
+                status.textContent = '✅ Новое место найдено!';
+                status.classList.add('show');
+
+                setTimeout(() => {
+                    status.classList.remove('show');
+                    isUpdating = false;
+                }, 1500);
+
+            }, 600);
+        }
+
+        generateRandomLocation();
+
+        document.querySelectorAll('.map-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
