@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name-width="device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Твоё случайное приключение</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Comfortaa:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -66,13 +66,66 @@
             border: 1px solid rgba(255,255,255,0.5);
         }
 
+        /* Улучшения для мобильных устройств */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .container {
+                padding: 25px 20px;
+                margin: 10px 0;
+                max-width: none;
+                width: 100%;
+                min-height: auto;
+            }
+
+            .sparkles {
+                font-size: 40px !important;
+            }
+
+            h1 {
+                font-size: 18px !important;
+                margin-bottom: 15px !important;
+            }
+
+            .weather {
+                padding: 12px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .temperature {
+                font-size: 22px !important;
+            }
+
+            .compliment {
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+                font-size: 14px !important;
+            }
+
+            .main-btn {
+                padding: 16px 30px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .map-btn {
+                padding: 12px 16px !important;
+            }
+        }
+
         .sparkles {
             font-size: 45px;
             margin-bottom: 15px;
             animation: sparkle 3s ease-in-out infinite;
             background: linear-gradient(45deg, #ff6b9d, #ff8eb4, #ffafbd);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            color: #ff6b9d; /* Fallback для Firefox */
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
@@ -239,6 +292,12 @@
         .main-btn.updating {
             background: linear-gradient(135deg, #ff85a2, #ff9eb5);
             animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.98); }
+            100% { transform: scale(1); }
         }
 
         .maps-title {
@@ -429,7 +488,6 @@
             }
         }
 
-        // Новые границы квадрата в Тюмени
         const latMin = 57.102143;
         const latMax = 57.166647;
         const lonMin = 65.482014;
